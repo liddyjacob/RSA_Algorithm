@@ -13,7 +13,11 @@
 
 /// JACOB LIDDY:
   // Prototypes for functions:
-int fermat(int size);
+BigInteger generate_prime(int size);
+//This function uses:
+  bool Fermat(BigInteger base);
+  bool Miller_Rabin(BigInteger tests);
+BigInteger lcm(BigInteger, BigInteger);
 std::pair<BigInteger, BigInteger> generate_private();
 std::pair<BigInteger, BigInteger> generate_public();
  
@@ -26,6 +30,10 @@ int main() {
 	 * code that uses exceptions. */
 	try {
 		      
+      //Test Cases:
+
+
+/*
       std::cout << "a couple of test cases for 3460:435/535 Algorithms!!!\n";
       BigInteger big1 = BigInteger(1);
       for (int i=0;i<400;i++) {
@@ -33,6 +41,7 @@ int main() {
       }
       std::cout << "\nmy big1 !!!\n";
       std::cout << big1;
+
       BigInteger big2 = BigInteger(1);
       for (int i=0;i<400;i++) {
          big2 = big2*10 +rand();
@@ -44,11 +53,21 @@ int main() {
       std::cout <<big3;
       std::cout << "\nmy big3/big2 !!!\n";
       std::cout <<big3/big2;
-      
+*/      
+
+  BigInteger b1 = generate_prime(1024);
+
+
 	} catch(char const* err) {
 		std::cout << "The library threw an exception:\n"
 			<< err << std::endl;
 	}
 
 	return 0;
+}
+
+
+BigInteger generate_prime(int size){
+
+  return BigInteger(1);
 }
