@@ -15,7 +15,7 @@
 
 /// JACOB LIDDY:
   // Prototypes for functions:
-BigInteger generate_prime(int bit_size, std::default_random_engine engine);
+BigInteger generate_prime(int bit_size, std::default_random_engine& engine);
 //This function uses:
   bool fermat(BigInteger base);
   bool miller_rabin(BigInteger tests);
@@ -64,6 +64,11 @@ int main() {
 
   BigInteger b1 = generate_prime(4, gen);
   std::cout << "4 bit Prime:"<< b1 << std::endl;
+  BigInteger b2 = generate_prime(4, gen);
+  std::cout << "4 bit Prime:" << b2 << std::endl;
+  BigInteger b3 = generate_prime(128, gen);
+  std::cout << "128 bit Prime:" << b3 << std::endl;
+
 
 
 	} catch(char const* err) {
@@ -75,13 +80,15 @@ int main() {
 }
 
 
-BigInteger generate_prime(int bit_size, std::default_random_engine gen){
+BigInteger generate_prime(int bit_size, std::default_random_engine& gen){
 
   BigInteger prime(1);
 
   do{
 
     while(!fermat(prime)){
+
+      prime = BigInteger(1);
 
       //First bit MUST BE a 1, ruling all even numbers out.
       //Last bit MUST BE a 1, otherwise prime is too small.
@@ -119,7 +126,22 @@ bool fermat(BigInteger p_canidate){
   if (p_canidate == BigInteger(1)){
     return false;
   }
-  return true;
+
+  //Check 2:
+
+  //Some super-garbage-hack ways of getting unsigneds.
+  std::string expstr(bigIntegerToString(p_canidate - BigInteger(1)));
+  std::string modstr(bigIntegerToString(p_canidate));  
+
+  BigUnsigned exp = stringToBigUnsigned(expstr);
+  BigUnsigned mod = stringToBigUnsigned(modstr);
+
+  
+
+  if (BigInteger(1) == modexp(BigInteger(2), exp, mod))
+    return true;
+
+  return false;
 }
 
 bool miller_rabin(BigInteger p_canidate){
