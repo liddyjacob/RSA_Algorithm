@@ -13,10 +13,12 @@
 
 /// JACOB LIDDY:
   // Prototypes for functions:
-BigInteger generate_prime(int size);
+BigInteger generate_prime(int bit_size);
 //This function uses:
-  bool Fermat(BigInteger base);
-  bool Miller_Rabin(BigInteger tests);
+  bool fermat(BigInteger base);
+  bool miller_rabin(BigInteger tests);
+  BigInteger powerOfTwo(int power);
+
 BigInteger lcm(BigInteger, BigInteger);
 std::pair<BigInteger, BigInteger> generate_private();
 std::pair<BigInteger, BigInteger> generate_public();
@@ -55,7 +57,8 @@ int main() {
       std::cout <<big3/big2;
 */      
 
-  BigInteger b1 = generate_prime(1024);
+  BigInteger b1 = generate_prime(4);
+  std::cout << "4 bit Prime:"<< b1 << std::endl;
 
 
 	} catch(char const* err) {
@@ -67,7 +70,53 @@ int main() {
 }
 
 
-BigInteger generate_prime(int size){
+BigInteger generate_prime(int bit_size){
 
-  return BigInteger(1);
+  BigInteger prime(1);
+
+  do{
+
+    while(!fermat(prime)){
+
+      //First bit MUST BE a 1, ruling all even numbers out.
+      //Last bit MUST BE a 1, otherwise prime is too small.
+      for(int bit = 2; bit < bit_size; ++bit){
+
+        if (rand() % 2) {
+          prime += powerOfTwo(bit);
+        }
+
+      }
+
+      prime += powerOfTwo(bit_size);
+
+    }
+    //After middle numbers are added, finish by adding on large bit.
+
+  } while(!miller_rabin(1));//How many test should we do?
+
+
+  return prime;
+}
+
+BigInteger powerOfTwo(int size){
+  BigInteger two_power = BigInteger(1);
+
+  for(int i=1; i <= size; ++i){
+    two_power *= BigInteger(2); 
+  }
+
+  return two_power;
+}
+
+
+bool fermat(BigInteger p_canidate){
+  if (p_canidate == BigInteger(1)){
+    return false;
+  }
+  return true;
+}
+
+bool miller_rabin(BigInteger p_canidate){
+  return true;
 }
