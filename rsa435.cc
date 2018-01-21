@@ -69,6 +69,9 @@ int main() {
   BigInteger b3 = generate_prime(128, gen);
   std::cout << "128 bit Prime:" << b3 << std::endl;
 
+  BigInteger b4 = generate_prime(1024,gen);
+  std::cout << "1024 bit prime:" << b4; 
+
 
 
 	} catch(char const* err) {
@@ -80,28 +83,29 @@ int main() {
 }
 
 
+
+
 BigInteger generate_prime(int bit_size, std::default_random_engine& gen){
 
   BigInteger prime(1);
 
+  //First bit MUST BE a 1, ruling all even numbers out.
+  //Last bit MUST BE a 1, otherwise prime is too small.
+  for(int bit = 1; bit < bit_size; ++bit){
+
+    if (std::uniform_int_distribution<int>(0,1)(gen)) {
+      prime += powerOfTwo(bit);
+    }
+
+  }
+
+  prime += powerOfTwo(bit_size);
+
+
   do{
 
     while(!fermat(prime)){
-
-      prime = BigInteger(1);
-
-      //First bit MUST BE a 1, ruling all even numbers out.
-      //Last bit MUST BE a 1, otherwise prime is too small.
-      for(int bit = 1; bit < bit_size; ++bit){
-
-        if (std::uniform_int_distribution<int>(0,1)(gen)) {
-          prime += powerOfTwo(bit);
-        }
-
-      }
-
-      prime += powerOfTwo(bit_size);
-
+      prime+=BigInteger(2);// Always a prime between n and 2n.
     }
     //After middle numbers are added, finish by adding on large bit.
 
@@ -120,7 +124,7 @@ BigInteger powerOfTwo(int size){
 
   return two_power;
 }
-
+ 
 
 bool fermat(BigInteger p_canidate){
   if (p_canidate == BigInteger(1)){
@@ -143,6 +147,7 @@ bool fermat(BigInteger p_canidate){
 
   return false;
 }
+
 
 bool miller_rabin(BigInteger p_canidate){
   return true;
