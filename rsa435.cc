@@ -6,14 +6,16 @@
 #include <stdlib.h> 
 
 #include <utility>
+#include <random>
 
+#include <chrono>
 
 // `BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
 
 /// JACOB LIDDY:
   // Prototypes for functions:
-BigInteger generate_prime(int bit_size);
+BigInteger generate_prime(int bit_size, std::default_random_engine engine);
 //This function uses:
   bool fermat(BigInteger base);
   bool miller_rabin(BigInteger tests);
@@ -57,7 +59,10 @@ int main() {
       std::cout <<big3/big2;
 */      
 
-  BigInteger b1 = generate_prime(4);
+  unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine gen(seed1);
+
+  BigInteger b1 = generate_prime(4, gen);
   std::cout << "4 bit Prime:"<< b1 << std::endl;
 
 
@@ -70,7 +75,7 @@ int main() {
 }
 
 
-BigInteger generate_prime(int bit_size){
+BigInteger generate_prime(int bit_size, std::default_random_engine gen){
 
   BigInteger prime(1);
 
@@ -80,9 +85,9 @@ BigInteger generate_prime(int bit_size){
 
       //First bit MUST BE a 1, ruling all even numbers out.
       //Last bit MUST BE a 1, otherwise prime is too small.
-      for(int bit = 2; bit < bit_size; ++bit){
+      for(int bit = 1; bit < bit_size; ++bit){
 
-        if (rand() % 2) {
+        if (std::uniform_int_distribution<int>(0,1)(gen)) {
           prime += powerOfTwo(bit);
         }
 

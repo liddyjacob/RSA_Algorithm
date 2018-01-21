@@ -3,7 +3,7 @@ all:
 
 # Implicit rule to compile C++ files.  Modify to your taste.
 %.o: %.cc
-	g++ -c -O2 -Wall -Wextra -pedantic $<
+	g++ -c -O2 -Wall -Wextra -pedantic -std=c++14 $<
 
 # Components of the library.
 library-objects = \
