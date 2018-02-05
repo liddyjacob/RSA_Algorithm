@@ -25,7 +25,8 @@ BigInteger lcm(BigInteger, BigInteger);
 std::pair<BigInteger, BigInteger> generate_private();
 std::pair<BigInteger, BigInteger> generate_public();
  
-
+void savebigint(BigUnsigned n, std::string filename);
+void savepair(..., std::string filename);
 
 int main() {
 	/* The library throws `const char *' error messages when things go
@@ -33,33 +34,8 @@ int main() {
 	 * one.  Your C++ compiler might need a command-line option to compile
 	 * code that uses exceptions. */
 	try {
-		      
-      //Test Cases:
 
-
-/*
-      std::cout << "a couple of test cases for 3460:435/535 Algorithms!!!\n";
-      BigInteger big1 = BigInteger(1);
-      for (int i=0;i<400;i++) {
-         big1 = big1*10 +rand();
-      }
-      std::cout << "\nmy big1 !!!\n";
-      std::cout << big1;
-
-      BigInteger big2 = BigInteger(1);
-      for (int i=0;i<400;i++) {
-         big2 = big2*10 +rand();
-      }
-      std::cout << "\nmy big2 !!!\n";
-      std::cout << big2;
-      std::cout << "\nmy big3 = big1*big2 !!!\n";
-      BigInteger big3 = big1*big2;
-      std::cout <<big3;
-      std::cout << "\nmy big3/big2 !!!\n";
-      std::cout <<big3/big2;
-*/      
-
-  unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+	unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine gen(seed1);
 
   BigUnsigned b1 = generate_prime(4, gen);
@@ -89,35 +65,28 @@ BigUnsigned generate_prime(int bit_size, std::default_random_engine& gen){
 
   BigUnsigned prime(1);
 
-
-  //First bit MUST BE a 1, ruling all even numbers out.
+  //First bit MUST BE a 1, odd numbers only.
   //Last bit MUST BE a 1, otherwise prime is too small.
   for(int bit = 1; bit < bit_size; ++bit){
 
     if (std::uniform_int_distribution<int>(0,1)(gen)) {
       prime.setBit(bit, 1);
-//powerOfTwo(bit);
     }
 
   }
 
-  prime.setBit(bit_size,1);// += powerOfTwo(bit_size);
+  prime.setBit(bit_size,1);//Makes sure prime is large.
 
-
-  do{
-
-    while(!fermat(prime)){
-      prime+=BigUnsigned(2);// Always a prime between n and 2n.
-    }
-    //After middle numbers are added, finish by adding on large bit.
-
-  } while(!miller_rabin(1));//How many test should we do?
+  while(!fermat(prime)){
+    prime+=BigUnsigned(2);// Keep adding until prime.
+  }
 
 
   return prime;
 }
 
 BigInteger powerOfTwo(int size){
+
   BigInteger two_power = BigInteger(1);
 
   for(int i=1; i <= size; ++i){
@@ -133,17 +102,10 @@ bool fermat(BigUnsigned p_canidate){
     return false;
   }
 
-  //Check 2:
-
-  //Some super-garbage-hack ways of getting unsigneds.
-//  std::string expstr(bigIntegerToString(p_canidate - BigInteger(1)));
-//  std::string modstr(bigIntegerToString(p_canidate));  
-
   BigUnsigned exp = p_canidate - BigUnsigned(1);
   BigUnsigned mod = p_canidate;
 
-  
-  //Two tests:
+  //Two tests: a = 2,3
   if (BigInteger(1) != modexp(BigInteger(2), exp, mod))
     return false;
   if (BigInteger(1) != modexp(BigInteger(3), exp, mod))
@@ -152,7 +114,9 @@ bool fermat(BigUnsigned p_canidate){
   return true;
 }
 
+//Some super-garbage-hack ways of getting unsigneds.
+//  std::string expstr(bigIntegerToString(p_canidate - BigInteger(1)));
+//  std::string modstr(bigIntegerToString(p_canidate));  
 
-bool miller_rabin(BigInteger p_canidate){
-  return true;
-}
+
+
