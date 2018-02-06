@@ -11,16 +11,19 @@
 #include <chrono>
 #include <fstream>
 
+#include <thread>
+
 // `BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
 
 /// JACOB LIDDY:
   // Prototypes for functions:
-BigUnsigned generate_prime(int bit_size, std::default_random_engine& engine);
+std::pair<BigUnsigned, BigUnsigned>
+generate_primes(int bit_size, std::default_random_engine& engine);
 //This function uses:
+  void find_prime(BigUnsigned& prime);
   bool fermat(BigUnsigned base);
-  bool miller_rabin(BigInteger tests);
-  BigInteger powerOfTwo(int power);
+
 
 BigInteger lcm(BigInteger, BigInteger);
 std::pair<BigInteger, BigInteger> generate_private();
@@ -39,18 +42,12 @@ int main() {
 	unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine gen(seed1);
 
-  BigUnsigned b1 = generate_prime(4, gen);
-  std::cout << "4 bit Prime:"<< b1 << std::endl;
-  BigUnsigned b2 = generate_prime(4, gen);
-  std::cout << "4 bit Prime:" << b2 << std::endl;
-  BigUnsigned b3 = generate_prime(128, gen);
-  std::cout << "128 bit Prime:" << b3 << std::endl;
-
-  //BigUnsigned b4 = generate_prime(1024,gen);
-  //std::cout << "1024 bit prime:" << b4; 
-
-  saveBigUnsigned(b2, "p_q.txt");
-  saveBigUnsigned(b3, "p_q.txt");
+  std::pair<BigUnsigned, BigUnsigned> p1 = generate_primes(1024, gen);
+  std::cout << "1024 bit Prime:"<< p1.first << std::endl;
+  std::cout << "1024 bit Prime:" << p1.second << std::endl;
+  
+  saveBigUnsigned(p1.first, "p_q.txt");
+  saveBigUnsigned(p1.second, "p_q.txt");
 
 	} catch(char const* err) {
 		std::cout << "The library threw an exception:\n"
@@ -60,44 +57,55 @@ int main() {
 	return 0;
 }
 
+std::pair<BigUnsigned, BigUnsigned> generate_primes(int bit_size, std::default_random_engine& gen){
 
-
-
-BigUnsigned generate_prime(int bit_size, std::default_random_engine& gen){
-
-  BigUnsigned prime(1);
-
+  BigUnsigned prime1(1);
+  BigUnsigned prime2(1);
   //First bit MUST BE a 1, odd numbers only.
   //Last bit MUST BE a 1, otherwise prime is too small.
   for(int bit = 1; bit < bit_size; ++bit){
 
     if (std::uniform_int_distribution<int>(0,1)(gen)) {
-      prime.setBit(bit, 1);
+      prime1.setBit(bit, 1);
     }
-
+    if (std::uniform_int_distribution<int>(0,1)(gen)){
+      prime2.setBit(bit,1);
+    }
+    
   }
 
-  prime.setBit(bit_size,1);//Makes sure prime is large.
+  prime1.setBit(bit_size,1);//Makes sure prime is large.
+  prime2.setBit(bit_size,1);
+
+  std::thread t1(find_prime, std::ref(prime1));
+  std::thread t2(find_prime, std::ref(prime2));
+
+  t1.join();
+  t2.join();
+
+  return std::pair<BigUnsigned, BigUnsigned>(prime1, prime2);
+
+}
+
+
+void find_prime(BigUnsigned& prime){
 
   while(!fermat(prime)){
     prime+=BigUnsigned(2);// Keep adding until prime.
   }
 
-
-  return prime;
 }
 
-BigInteger powerOfTwo(int size){
+void fermat_exp(BigInteger base, BigUnsigned power, 
+            BigUnsigned mod, bool& pass)
+{
 
-  BigInteger two_power = BigInteger(1);
-
-  for(int i=1; i <= size; ++i){
-    two_power *= BigInteger(2); 
-  }
-
-  return two_power;
-}
+  if (BigInteger(1) != modexp(base, power, mod))
+    pass = false;
+  else
+    pass = true;
  
+}
 
 bool fermat(BigUnsigned p_canidate){
   if (p_canidate == BigUnsigned(1)){
@@ -107,14 +115,20 @@ bool fermat(BigUnsigned p_canidate){
   BigUnsigned exp = p_canidate - BigUnsigned(1);
   BigUnsigned mod = p_canidate;
 
-  //Two tests: a = 2,3
-  if (BigInteger(1) != modexp(BigInteger(2), exp, mod))
-    return false;
-  if (BigInteger(1) != modexp(BigInteger(3), exp, mod))
-    return false;
+  bool pass1 = false;
+  bool pass2 = false;
 
-  return true;
+  std::thread t1(fermat_exp, BigInteger(2), exp, mod, std::ref(pass1));
+  std::thread t2(fermat_exp, BigInteger(3), exp, mod, std::ref(pass2));
+
+  t1.join();
+  t2.join();
+
+  return (pass1 && pass2);
 }
+
+
+
 
 void saveBigUnsigned(BigUnsigned p, std::string filename){
   // Open the file:
