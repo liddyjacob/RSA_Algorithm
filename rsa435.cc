@@ -9,6 +9,7 @@
 #include <random>
 
 #include <chrono>
+#include <fstream>
 
 // `BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
@@ -25,8 +26,8 @@ BigInteger lcm(BigInteger, BigInteger);
 std::pair<BigInteger, BigInteger> generate_private();
 std::pair<BigInteger, BigInteger> generate_public();
  
-void savebigint(BigUnsigned n, std::string filename);
-void savepair(..., std::string filename);
+void saveBigUnsigned(BigUnsigned n, std::string filename);
+//void savepair(..., std::string filename);
 
 int main() {
 	/* The library throws `const char *' error messages when things go
@@ -45,10 +46,11 @@ int main() {
   BigUnsigned b3 = generate_prime(128, gen);
   std::cout << "128 bit Prime:" << b3 << std::endl;
 
-  BigUnsigned b4 = generate_prime(1024,gen);
-  std::cout << "1024 bit prime:" << b4; 
+  //BigUnsigned b4 = generate_prime(1024,gen);
+  //std::cout << "1024 bit prime:" << b4; 
 
-
+  saveBigUnsigned(b2, "p_q.txt");
+  saveBigUnsigned(b3, "p_q.txt");
 
 	} catch(char const* err) {
 		std::cout << "The library threw an exception:\n"
@@ -113,6 +115,27 @@ bool fermat(BigUnsigned p_canidate){
 
   return true;
 }
+
+void saveBigUnsigned(BigUnsigned p, std::string filename){
+  // Open the file:
+  std::ofstream savefile;
+  savefile.open(filename.c_str(), std::ios::app);
+
+  if (savefile.is_open()){
+
+    savefile << p;
+    savefile << std::endl;
+
+  } 
+  else {
+    std::cerr << "p not saved to file! Failed to open\n";
+  }
+  // Close the ifle 
+  savefile.close();
+}
+
+
+
 
 //Some super-garbage-hack ways of getting unsigneds.
 //  std::string expstr(bigIntegerToString(p_canidate - BigInteger(1)));
