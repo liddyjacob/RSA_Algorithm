@@ -16,20 +16,38 @@
 // `BigIntegerLibrary.hh' includes all of the library headers.
 #include "BigIntegerLibrary.hh"
 
-/// JACOB LIDDY:
-  // Prototypes for functions:
+/// JACOB LIDDY
+
+
+// Prototypes for functions:
+
+
+/* generate_primes: Generates two primes, returns an std::pair
+ * of primes as BigUnsigned 
+ * 
+ * Parameters:
+ *   bit_size: the size of the prime in terms of binary digits.
+ *   engine: the random-generating engine for our prime */
+
+
 std::pair<BigUnsigned, BigUnsigned>
 generate_primes(int bit_size, std::default_random_engine& engine);
 //This function uses:
-  void find_prime(BigUnsigned& prime);
+  void find_prime(BigUnsigned& prime); // For threads
   bool fermat(BigUnsigned base);
 
+// Generate exponents e, d based off p and q.
+std::pair<BigInteger, BigInteger> 
+generate_exps(BigUnsigned p, BigUnsigned q);
 
-BigInteger lcm(BigInteger, BigInteger);
-std::pair<BigInteger, BigInteger> generate_private();
-std::pair<BigInteger, BigInteger> generate_public();
- 
-void saveBigUnsigned(BigUnsigned n, std::string filename);
+// Append to the end of a file 
+template <typename T>
+void saveNumber(T n, std::string filename);
+
+//Save the keys in desired files:
+void saveKey(std::pair<BigUnsigned, BigUnsigned> p_q,
+             std::pair<BigInteger, BigInteger>   e_d,
+             std::string f1name, std::string f2name); 
 //void savepair(..., std::string filename);
 
 int main() {
@@ -43,11 +61,15 @@ int main() {
   std::default_random_engine gen(seed1);
 
   std::pair<BigUnsigned, BigUnsigned> p1 = generate_primes(1024, gen);
-  std::cout << "1024 bit Prime:"<< p1.first << std::endl;
-  std::cout << "1024 bit Prime:" << p1.second << std::endl;
-  
-  saveBigUnsigned(p1.first, "p_q.txt");
-  saveBigUnsigned(p1.second, "p_q.txt");
+
+  saveNumber(p1.first, "p_q.txt");
+  saveNumber(p1.second, "p_q.txt");
+
+  std::pair<BigInteger, BigInteger> e_d 
+    = generate_exps(p1.first, p1.second);
+
+  saveKey(p1, e_d, "e_n.txt", "d_n.txt");
+
 
 	} catch(char const* err) {
 		std::cout << "The library threw an exception:\n"
@@ -61,6 +83,7 @@ std::pair<BigUnsigned, BigUnsigned> generate_primes(int bit_size, std::default_r
 
   BigUnsigned prime1(1);
   BigUnsigned prime2(1);
+
   //First bit MUST BE a 1, odd numbers only.
   //Last bit MUST BE a 1, otherwise prime is too small.
   for(int bit = 1; bit < bit_size; ++bit){
@@ -88,12 +111,12 @@ std::pair<BigUnsigned, BigUnsigned> generate_primes(int bit_size, std::default_r
 }
 
 
+
 void find_prime(BigUnsigned& prime){
 
   while(!fermat(prime)){
     prime+=BigUnsigned(2);// Keep adding until prime.
   }
-
 }
 
 void fermat_exp(BigInteger base, BigUnsigned power, 
@@ -129,31 +152,62 @@ bool fermat(BigUnsigned p_canidate){
 
 
 
-
-void saveBigUnsigned(BigUnsigned p, std::string filename){
+template <typename T>
+void saveNumber(T n, std::string filename){
   // Open the file:
   std::ofstream savefile;
   savefile.open(filename.c_str(), std::ios::app);
 
   if (savefile.is_open()){
-
-    savefile << p;
+    savefile << n;
     savefile << std::endl;
-
   } 
   else {
-    std::cerr << "p not saved to file! Failed to open\n";
+    std::cerr << "n not saved to file! Failed to open\n";
   }
   // Close the ifle 
   savefile.close();
 }
+void saveKey(std::pair<BigUnsigned, BigUnsigned> p_q,
+             std::pair<BigInteger, BigInteger>   e_d,
+             std::string f1name, std::string f2name){
 
+  BigUnsigned n = p_q.first * p_q.second;
+  
+  saveNumber(n, f1name);
+  saveNumber(e_d.first, f1name);
 
+  saveNumber(n, f2name);
+  saveNumber(e_d.second, f2name);
 
+}
+// Returns e,d:
+std::pair<BigInteger, BigInteger> 
+generate_exps(BigUnsigned p, BigUnsigned q){
 
-//Some super-garbage-hack ways of getting unsigneds.
-//  std::string expstr(bigIntegerToString(p_canidate - BigInteger(1)));
-//  std::string modstr(bigIntegerToString(p_canidate));  
+  auto pos = BigInteger::positive;
+
+  BigInteger p_(p, pos);
+  BigInteger q_(q, pos);
+
+  BigInteger one(1);
+
+  BigInteger gcd(0);
+ 
+  BigInteger e(39); // Start at 41, likely that it is coprime.
+  BigInteger d(0); // Better not be zero when we are done.
+
+  BigInteger euler_phi = (p_ - one)*(q_ - one);
+  BigInteger dummy(0);
+
+  while (gcd != one){
+    
+    e = e + one + one;
+    extendedEuclidean(euler_phi, e, gcd, dummy, d);
+  }
+
+  return std::pair<BigInteger, BigInteger>(e,d % euler_phi);
+}
 
 
 
