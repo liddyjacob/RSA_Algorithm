@@ -1,8 +1,8 @@
-An RSA Implimentation using Matt McCutchen's Big Integer Library. 
+An RSA Implementation using Matt McCutchen's Big Integer Library. 
 For more details, check out: http://mattmccutchen.net/bigint/
 
-Also, signs documents to test the implimentation. For this we use
-the zedwood.com implimentation. BSD Liscense.
+Also, signs documents to test the implementation. For this we use
+the zedwood.com sha256.
 http://www.zedwood.com/article/cpp-sha256-function
 
 For Algorithms(435). And fun.
