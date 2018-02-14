@@ -43,6 +43,8 @@ generate_exps(BigUnsigned p, BigUnsigned q);
 // Append to the end of a file 
 template <typename T>
 void saveNumber(T n, std::string filename);
+void clearFile(std::string filename);
+
 
 //Save the keys in desired files:
 void saveKey(std::pair<BigUnsigned, BigUnsigned> p_q,
@@ -62,12 +64,15 @@ int main() {
 
   std::pair<BigUnsigned, BigUnsigned> p1 = generate_primes(1024, gen);
 
+  clearFile("p_q.txt");
   saveNumber(p1.first, "p_q.txt");
   saveNumber(p1.second, "p_q.txt");
 
   std::pair<BigInteger, BigInteger> e_d 
     = generate_exps(p1.first, p1.second);
 
+  clearFile("e_n.txt");
+  clearFile("d_n.txt");
   saveKey(p1, e_d, "e_n.txt", "d_n.txt");
 
 
@@ -174,11 +179,17 @@ void saveKey(std::pair<BigUnsigned, BigUnsigned> p_q,
 
   BigUnsigned n = p_q.first * p_q.second;
   
-  saveNumber(n, f1name);
   saveNumber(e_d.first, f1name);
+  saveNumber(n, f1name);
 
-  saveNumber(n, f2name);
   saveNumber(e_d.second, f2name);
+  saveNumber(n, f2name);
+}
+
+void clearFile(std::string file){
+  std::ofstream clearfile;  
+  clearfile.open(file.c_str(), std::ios::trunc);
+  clearfile.close();
 
 }
 // Returns e,d:

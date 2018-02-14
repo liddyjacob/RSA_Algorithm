@@ -12,6 +12,7 @@ library-objects = \
 	BigIntegerAlgorithms.o \
 	BigUnsignedInABase.o \
 	BigIntegerUtils.o \
+	sha256.o \
 
 library-headers = \
 	NumberlikeArray.hh \
@@ -20,6 +21,7 @@ library-headers = \
 	BigIntegerAlgorithms.hh \
 	BigUnsignedInABase.hh \
 	BigIntegerLibrary.hh \
+	sha256.h \
 
 # To ``make the library'', make all its objects using the implicit rule.
 library: $(library-objects)
@@ -49,20 +51,27 @@ testsuite-cleanfiles = \
 # your own Makefile.
 
 # Components of the program.
-program = rsa435
-program-objects = rsa435.o
+program1 = rsa435
+program1-objects = rsa435.o
+
+program2 = sign
+program2-objects = sign.o 
 
 # Conservatively assume all the program source files depend on all the library
 # headers.  You can change this if it is not the case.
-$(program-objects) : $(library-headers)
+$(program1-objects) : $(library-headers)
+$(program2-objects) : $(library-headers)
 
 # How to link the program.  The implicit rule covers individual objects.
-$(program) : $(program-objects) $(library-objects)
+$(program1) : $(program1-objects) $(library-objects)
+	g++ $^ -o $@ -pthread
+
+$(program2) : $(program2-objects) $(library-objects)
 	g++ $^ -o $@ -pthread
 
 # Delete all generated files we know about.
 clean :
-	rm -f $(library-objects) $(testsuite-cleanfiles) $(program-objects) $(program)
+	rm -f $(library-objects) $(testsuite-cleanfiles) $(program1-objects) $(program1) $(program2-objects) $(program2)
 
 # I removed the *.tag dependency tracking system because it had few advantages
 # over manually entering all the dependencies.  If there were a portable,
@@ -70,4 +79,4 @@ clean :
 # cons and depcomp are almost good enough.
 
 # Come back and define default target.
-all : library $(program)
+all : library $(program1) $(program2)

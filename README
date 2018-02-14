@@ -3,3 +3,35 @@ For more details, check out: http://mattmccutchen.net/bigint/
 
 For Algorithms(435). And fun.
 
+### INSTRUCTIONS:
+
+* Always do a make clean, then a make
+============
+```
+  make clean
+  make
+```
+============
+
+* To generate the key, just run rsa435
+============
+```
+  ./rsa435
+```
+============
+p_q will be the primes, and d_n.txt e_n are private and 
+public keys respectivly.
+
+* To sign a file, just use the following command:
+============
+```
+  ./sign s (filename)
+```
+============
+
+* To verify the signature, use the following command:
+============
+```
+  ./sign v (signedfile)
+```
+============
